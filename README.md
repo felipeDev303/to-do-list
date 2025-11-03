@@ -40,14 +40,26 @@ Una aplicación móvil moderna y completa para gestionar tareas pendientes, desa
 
 ### Funcionalidades Actuales
 
+#### 🔐 Autenticación
+
+- **Pantalla de Login**: Interfaz de inicio de sesión moderna y segura
+- **Registro de Usuarios**: Formulario de registro con validaciones
+- **Validación de Email**: Verificación de formato de email correcto
+- **Mostrar/Ocultar Contraseña**: Toggle para visualizar contraseña
+- **Acceso Sin Cuenta**: Opción para continuar sin autenticación
+- **Cerrar Sesión**: Botón de logout en la pantalla principal
+
+#### 📝 Gestión de Tareas
+
 - **➕ Agregar Tareas**: Crear nuevas tareas con título y descripción opcional
 - **✏️ Editar Tareas**: Modificar tareas existentes
-- **✅ Marcar como Completadas**: Indicador visual de tareas completadas
+- **✅ Marcar como Completadas**: Indicador visual de tareas completadas con checkbox
 - **🗑️ Eliminar Tareas**: Remover tareas con confirmación previa
 - **📊 Contador de Tareas**: Visualización del total de tareas pendientes
 - **🎨 Interfaz Moderna**: Diseño Material Design con iconos de MaterialIcons
 - **⚡ Rendimiento Optimizado**: Lista virtualizada con FlatList
 - **📱 Diseño Responsivo**: Adaptable a diferentes tamaños de pantalla
+- **✔️ TypeScript**: Código completamente tipado para mayor seguridad
 
 ### Funcionalidades Planificadas (Roadmap)
 
@@ -223,14 +235,39 @@ npx expo start --web
 
 ## 💻 Uso
 
-### Agregar una Tarea
+### 🔐 Inicio de Sesión
+
+Al abrir la aplicación, verás la pantalla de login:
+
+#### Iniciar Sesión
+
+1. Ingresa tu **email** (debe ser un formato válido)
+2. Ingresa tu **contraseña**
+3. Presiona **"Iniciar Sesión"**
+4. Serás redirigido a la pantalla de tareas
+
+#### Registrarse
+
+1. Presiona **"Regístrate"** en la parte inferior del formulario
+2. Ingresa un **email válido**
+3. Crea una **contraseña** (mínimo 6 caracteres)
+4. Presiona **"Registrarse"**
+5. Una vez registrado, cambia a modo login para acceder
+
+#### Acceso Rápido
+
+- Presiona **"Continuar sin cuenta"** para acceder directamente sin autenticación
+
+### 📝 Gestión de Tareas
+
+#### Agregar una Tarea
 
 1. Ingresa el **título** de la tarea (obligatorio)
 2. Opcionalmente, agrega una **descripción** detallada
 3. Presiona el botón **"Agregar Tarea"**
 4. La tarea aparecerá en la lista inferior
 
-### Editar una Tarea
+#### Editar una Tarea
 
 1. Presiona el ícono de **edición** (✏️) en la tarea deseada
 2. Los campos se rellenarán con la información actual
@@ -238,18 +275,24 @@ npx expo start --web
 4. Presiona **"Actualizar Tarea"**
 5. Para cancelar, presiona **"Cancelar Edición"**
 
-### Completar/Descompletar una Tarea
+#### Completar/Descompletar una Tarea
 
 1. Presiona el **checkbox** (☐) al inicio de la tarea
 2. La tarea se marcará como completada (✅)
 3. El texto mostrará un tachado
 4. Presiona nuevamente para desmarcar
 
-### Eliminar una Tarea
+#### Eliminar una Tarea
 
 1. Presiona el ícono de **eliminar** (🗑️)
 2. Confirma la acción en el diálogo
 3. La tarea se eliminará permanentemente
+
+#### Cerrar Sesión
+
+1. Presiona el ícono de **logout** (🚪) en la esquina superior derecha
+2. Confirma que deseas cerrar sesión
+3. Serás redirigido a la pantalla de login
 
 ## 📁 Estructura del Proyecto
 
@@ -261,6 +304,7 @@ to-do-list/
 │   │   ├── index.tsx            # ⭐ Pantalla principal (To-Do List)
 │   │   └── explore.tsx          # Pantalla de exploración
 │   ├── _layout.tsx              # Layout raíz de la aplicación
+│   ├── login.tsx                # 🔐 Pantalla de Login/Registro
 │   └── modal.tsx                # Pantalla modal
 │
 ├── assets/                       # Recursos estáticos
@@ -299,9 +343,45 @@ to-do-list/
 
 ## 🧩 Componentes Principales
 
-### App Component (index.tsx)
+### 🔐 LoginScreen Component (login.tsx)
 
-Componente principal que gestiona toda la lógica de la aplicación.
+Componente de autenticación que gestiona el login y registro de usuarios.
+
+```typescript
+// Estados principales
+const [email, setEmail] = useState<string>("");
+const [password, setPassword] = useState<string>("");
+const [showPassword, setShowPassword] = useState<boolean>(false);
+const [isLogin, setIsLogin] = useState<boolean>(true);
+```
+
+#### Características del Login
+
+- **Validación de Email**: Formato correcto de email requerido
+- **Validación de Contraseña**: Mínimo 6 caracteres para registro
+- **Toggle Password**: Mostrar/ocultar contraseña
+- **Modo Login/Registro**: Alternancia entre formularios
+- **Navegación**: Redirección automática después de login exitoso
+- **Acceso Sin Cuenta**: Opción para continuar sin autenticación
+
+#### Funciones Principales
+
+1. **`handleLogin()`**
+
+   - Valida campos no vacíos
+   - Verifica formato de email
+   - Simula login exitoso
+   - Navega a la pantalla de tareas
+
+2. **`handleRegister()`**
+   - Valida campos requeridos
+   - Verifica longitud de contraseña
+   - Valida formato de email
+   - Registra usuario y cambia a modo login
+
+### 📝 App Component (index.tsx)
+
+Componente principal que gestiona toda la lógica de la aplicación de tareas.
 
 ```typescript
 interface Tarea {
@@ -440,6 +520,15 @@ const typography = {
 
 ### Validaciones
 
+#### Autenticación
+
+- ✅ Email con formato válido requerido
+- ✅ Contraseña mínimo 6 caracteres (registro)
+- ✅ Campos no vacíos
+- ✅ Confirmación antes de cerrar sesión
+
+#### Tareas
+
 - ✅ Título obligatorio (no puede estar vacío)
 - ✅ Descripción opcional
 - ✅ Confirmación antes de eliminar
@@ -465,6 +554,15 @@ setTareas(
 
 ## 🔮 Evolución Futura
 
+### Fase 1: Autenticación Completa (En Progreso)
+
+- ✅ Pantalla de Login implementada
+- ✅ Validaciones de formulario
+- ⏳ Persistencia de sesión con AsyncStorage
+- ⏳ Rutas protegidas
+- ⏳ Tokens de autenticación
+- ⏳ Recuperación de contraseña
+
 ### Fase 2: Persistencia Local
 
 ```javascript
@@ -474,26 +572,47 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const guardarTareas = async (tareas) => {
   await AsyncStorage.setItem("tareas", JSON.stringify(tareas));
 };
+
+const guardarSesion = async (userData) => {
+  await AsyncStorage.setItem("userSession", JSON.stringify(userData));
+};
 ```
 
 ### Fase 3: Backend y API
 
 ```javascript
 // Integración con API REST
-const API_URL = "https://api.ejemplo.com/tareas";
+const API_URL = "https://api.ejemplo.com";
 
-const obtenerTareas = async () => {
-  const response = await fetch(API_URL);
+// Autenticación
+const loginUser = async (email, password) => {
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return await response.json();
+};
+
+// CRUD de tareas
+const obtenerTareas = async (token) => {
+  const response = await fetch(`${API_URL}/tareas`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return await response.json();
 };
 ```
 
-### Fase 4: Autenticación
+### Fase 4: Autenticación Avanzada
 
 ```javascript
-// Firebase Authentication
+// Firebase Authentication (opcional)
 import { auth } from "./firebase-config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 ```
 
 ### Fase 5: Funcionalidades Avanzadas
@@ -586,21 +705,39 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 📊 Estado del Proyecto
 
 ![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
-![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)
+![Versión](https://img.shields.io/badge/Versión-1.1.0-blue)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
+![React Native](https://img.shields.io/badge/React%20Native-0.71+-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-100%25-007ACC)
 
 ### Roadmap
 
+#### ✅ Completado (v1.0)
+
 - [x] Funcionalidades CRUD básicas
 - [x] Interfaz de usuario moderna
-- [x] Validaciones y feedback
-- [ ] Persistencia local (AsyncStorage)
+- [x] Validaciones y feedback de tareas
+- [x] Pantalla de Login/Registro
+- [x] Validación de formularios de autenticación
+- [x] Navegación entre pantallas
+- [x] Botón de cerrar sesión
+- [x] TypeScript completo
+
+#### 🚧 En Desarrollo
+
+- [ ] Persistencia de sesión (AsyncStorage)
+- [ ] Rutas protegidas
+- [ ] Persistencia de tareas localmente
+
+#### 📋 Pendiente
+
 - [ ] Backend y API REST
-- [ ] Autenticación de usuarios
+- [ ] Autenticación real con JWT
 - [ ] Sincronización en la nube
 - [ ] Notificaciones push
 - [ ] Modo oscuro
 - [ ] Tests automatizados
+- [ ] Recuperación de contraseña
 
 ---
 
