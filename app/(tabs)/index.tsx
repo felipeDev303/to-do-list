@@ -1,98 +1,367 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import {
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Interfaz para el tipo de Tarea
+interface Tarea {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  completada: boolean;
+}
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+export default function App() {
+  const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [titulo, setTitulo] = useState<string>("");
+  const [descripcion, setDescripcion] = useState<string>("");
+  const [editandoId, setEditandoId] = useState<number | null>(null);
+
+  // Agregar o actualizar tarea
+  const agregarTarea = () => {
+    if (titulo.trim() === "") {
+      Alert.alert("Error", "El título de la tarea no puede estar vacío");
+      return;
+    }
+
+    if (editandoId !== null) {
+      // Editar tarea existente
+      setTareas(
+        tareas.map((tarea) =>
+          tarea.id === editandoId ? { ...tarea, titulo, descripcion } : tarea
+        )
+      );
+      setEditandoId(null);
+      Alert.alert("Éxito", "Tarea actualizada correctamente");
+    } else {
+      // Agregar nueva tarea
+      const nuevaTarea = {
+        id: Date.now(),
+        titulo,
+        descripcion,
+        completada: false,
+      };
+      setTareas([...tareas, nuevaTarea]);
+      Alert.alert("Éxito", "Tarea agregada correctamente");
+    }
+
+    // Limpiar campos
+    setTitulo("");
+    setDescripcion("");
+  };
+
+  // Editar tarea
+  const editarTarea = (tarea: Tarea) => {
+    setTitulo(tarea.titulo);
+    setDescripcion(tarea.descripcion);
+    setEditandoId(tarea.id);
+  };
+
+  // Eliminar tarea
+  const eliminarTarea = (id: number) => {
+    Alert.alert(
+      "Confirmar",
+      "¿Estás seguro de que quieres eliminar esta tarea?",
+      [
+        { text: "Cancelar", onPress: () => {}, style: "cancel" },
+        {
+          text: "Eliminar",
+          onPress: () => {
+            setTareas(tareas.filter((tarea) => tarea.id !== id));
+            Alert.alert("Éxito", "Tarea eliminada correctamente");
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
+  // Alternar estado de completado
+  const toggleCompletada = (id: number) => {
+    setTareas(
+      tareas.map((tarea) =>
+        tarea.id === id ? { ...tarea, completada: !tarea.completada } : tarea
+      )
+    );
+  };
+
+  // Renderizar cada tarea
+  const renderTarea = ({ item }: { item: Tarea }) => (
+    <View style={styles.tareaItem}>
+      <TouchableOpacity
+        style={styles.checkBox}
+        onPress={() => toggleCompletada(item.id)}
+      >
+        <MaterialIcons
+          name={item.completada ? "check-box" : "check-box-outline-blank"}
+          size={24}
+          color={item.completada ? "#4CAF50" : "#999"}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      </TouchableOpacity>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.tareaContenido}>
+        <Text
+          style={[
+            styles.tareaTitulo,
+            item.completada && styles.tareaCompletada,
+          ]}
+        >
+          {item.titulo}
+        </Text>
+        {item.descripcion ? (
+          <Text
+            style={[
+              styles.tareaDescripcion,
+              item.completada && styles.tareaCompletada,
+            ]}
+          >
+            {item.descripcion}
+          </Text>
+        ) : null}
+      </View>
+
+      <TouchableOpacity
+        style={styles.botonEditar}
+        onPress={() => editarTarea(item)}
+      >
+        <MaterialIcons name="edit" size={20} color="#2196F3" />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.botonEliminar}
+        onPress={() => eliminarTarea(item.id)}
+      >
+        <MaterialIcons name="delete" size={20} color="#f44336" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={styles.contenedor}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.titulo}>Mi Lista de Tareas</Text>
+        <Text style={styles.subtitulo}>
+          {tareas.length} tarea{tareas.length !== 1 ? "s" : ""}
+        </Text>
+      </View>
+
+      <ScrollView style={styles.scrollView}>
+        {/* Formulario */}
+        <View style={styles.formulario}>
+          <Text style={styles.etiqueta}>Título de la Tarea</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Hacer compras"
+            value={titulo}
+            onChangeText={setTitulo}
+            placeholderTextColor="#999"
+          />
+
+          <Text style={styles.etiqueta}>Descripción (Opcional)</Text>
+          <TextInput
+            style={[styles.input, styles.inputMultilinea]}
+            placeholder="Ej: Ir al supermercado a comprar verduras"
+            value={descripcion}
+            onChangeText={setDescripcion}
+            multiline
+            numberOfLines={3}
+            placeholderTextColor="#999"
+          />
+
+          <TouchableOpacity style={styles.botonGuardar} onPress={agregarTarea}>
+            <MaterialIcons name="add" size={24} color="#fff" />
+            <Text style={styles.textoBotonGuardar}>
+              {editandoId ? "Actualizar Tarea" : "Agregar Tarea"}
+            </Text>
+          </TouchableOpacity>
+
+          {editandoId && (
+            <TouchableOpacity
+              style={styles.botonCancelar}
+              onPress={() => {
+                setTitulo("");
+                setDescripcion("");
+                setEditandoId(null);
+              }}
+            >
+              <Text style={styles.textoBotonCancelar}>Cancelar Edición</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Lista de Tareas */}
+        <View style={styles.listado}>
+          {tareas.length === 0 ? (
+            <View style={styles.sinTareas}>
+              <MaterialIcons name="task-alt" size={48} color="#ccc" />
+              <Text style={styles.textoSinTareas}>
+                No hay tareas aún. ¡Crea una para comenzar!
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={tareas}
+              renderItem={renderTarea}
+              keyExtractor={(item) => item.id.toString()}
+              scrollEnabled={false}
+            />
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  contenedor: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    backgroundColor: "#2196F3",
+    paddingTop: 40,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: "#E3F2FD",
+    marginTop: 4,
+  },
+  scrollView: {
+    flex: 1,
+    padding: 16,
+  },
+  formulario: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  etiqueta: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
+    marginTop: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    padding: 12,
+    fontSize: 14,
+    backgroundColor: "#fafafa",
+    color: "#333",
+  },
+  inputMultilinea: {
+    height: 80,
+    textAlignVertical: "top",
+  },
+  botonGuardar: {
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 6,
+    marginTop: 16,
+    elevation: 2,
+  },
+  textoBotonGuardar: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  botonCancelar: {
+    backgroundColor: "#f44336",
+    padding: 12,
+    borderRadius: 6,
+    marginTop: 8,
+    alignItems: "center",
+  },
+  textoBotonCancelar: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  listado: {
+    marginBottom: 20,
+  },
+  tareaItem: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  checkBox: {
+    marginRight: 12,
+  },
+  tareaContenido: {
+    flex: 1,
+  },
+  tareaTitulo: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  tareaDescripcion: {
+    fontSize: 13,
+    color: "#666",
+  },
+  tareaCompletada: {
+    color: "#999",
+    textDecorationLine: "line-through",
+  },
+  botonEditar: {
+    padding: 8,
+    marginRight: 8,
+  },
+  botonEliminar: {
+    padding: 8,
+  },
+  sinTareas: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  textoSinTareas: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 12,
+    textAlign: "center",
   },
 });
