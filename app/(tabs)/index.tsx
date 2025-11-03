@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -20,6 +21,7 @@ interface Tarea {
 }
 
 export default function App() {
+  const router = useRouter();
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [titulo, setTitulo] = useState<string>("");
   const [descripcion, setDescripcion] = useState<string>("");
@@ -144,14 +146,37 @@ export default function App() {
     </View>
   );
 
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro de que quieres cerrar sesión?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cerrar Sesión",
+          onPress: () => {
+            router.push("/login");
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.contenedor}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.titulo}>Mi Lista de Tareas</Text>
-        <Text style={styles.subtitulo}>
-          {tareas.length} tarea{tareas.length !== 1 ? "s" : ""}
-        </Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.titulo}>Mi Lista de Tareas</Text>
+          <Text style={styles.subtitulo}>
+            {tareas.length} tarea{tareas.length !== 1 ? "s" : ""}
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView}>
@@ -232,11 +257,22 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  logoutButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   titulo: {
     fontSize: 28,
